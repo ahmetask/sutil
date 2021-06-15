@@ -31,11 +31,44 @@ func NewString(value string) String {
 	return &value
 }
 
+func TestSet_Copy_Value(t *testing.T) {
+
+	v := MyStruct{A: "Foo", I: &InnerStruct{B: NewInt64(2), D: &DeepStruct{C: NewString("a")}}}
+
+	r, err := New(v).WithValue("test").WithPath("A", false).Set()
+
+	assert.NotNil(t, err)
+	assert.False(t, r)
+	assert.Equal(t, v.A, "Foo")
+}
+
+func TestSet_Address_Value(t *testing.T) {
+
+	v := &MyStruct{A: "Foo", I: &InnerStruct{B: NewInt64(2), D: &DeepStruct{C: NewString("a")}}}
+
+	r, err := New(v).WithValue("test").WithPath("A", false).Set()
+
+	assert.Nil(t, err)
+	assert.True(t, r)
+	assert.Equal(t, v.A, "test")
+}
+
 func TestSetIsNil(t *testing.T) {
 
 	v := &MyStruct{A: "Foo", I: &InnerStruct{B: NewInt64(2), D: &DeepStruct{C: NewString("a")}}}
 
 	r, err := New(v).WithValue(nil).WithPath("I.D.C", false).Set()
+
+	assert.Nil(t, err)
+	assert.True(t, r)
+	assert.Nil(t, v.I.D.C)
+}
+
+func TestSetIsNil_json(t *testing.T) {
+
+	v := &MyStruct{A: "Foo", I: &InnerStruct{B: NewInt64(2), D: &DeepStruct{C: NewString("a")}}}
+
+	r, err := New(v).WithValue(nil).WithPath("i.d.c", true).Set()
 
 	assert.Nil(t, err)
 	assert.True(t, r)
@@ -68,22 +101,22 @@ func TestSet_Without_Addr(t *testing.T) {
 
 	v := &MyStruct{A: "Foo", I: &InnerStruct{B: NewInt64(2), D: &DeepStruct{C: NewString("A"), D: 1}}}
 
-	r, err := New(v).WithValue(NewString("test")).WithPath("I.D.D", false).Set()
+	r, err := New(v).WithValue(NewInt64(2)).WithPath("I.D.D", false).Set()
 
 	assert.Nil(t, err)
-	assert.False(t, r)
-	assert.Equal(t, v.I.D.D, int64(1))
+	assert.True(t, r)
+	assert.Equal(t, v.I.D.D, int64(2))
 }
 
 func TestSet_Without_Addr_json(t *testing.T) {
 
 	v := &MyStruct{A: "Foo", I: &InnerStruct{B: NewInt64(2), D: &DeepStruct{C: NewString("A"), D: 1}}}
 
-	r, err := New(v).WithValue(NewString("test")).WithPath("i.d.d", true).Set()
+	r, err := New(v).WithValue(NewInt64(2)).WithPath("i.d.d", true).Set()
 
 	assert.Nil(t, err)
-	assert.False(t, r)
-	assert.Equal(t, v.I.D.D, int64(1))
+	assert.True(t, r)
+	assert.Equal(t, v.I.D.D, int64(2))
 }
 
 func TestSet_Struct(t *testing.T) {
