@@ -22,14 +22,18 @@ func main() {
 		C1: "test",
 		C2: 1,
 	}}}
+	a := sutil.New(v).WithPath("B.C.C1", false).Get()
+
+	fmt.Printf("get:%v\n", a.Value())
+
 
 	res, err := sutil.New(v).WithValue("main").WithPath("B.C.C1", false).Set()
 
 	j, _ := json.Marshal(v)
-	fmt.Printf("success:%v error:%v\nresult:%v", res, err, string(j))
+	fmt.Printf("success:%v error:%v\nresult:%v\n", res, err, string(j))
 
 	res, err = sutil.New(v).WithValue(B{}).WithPath("B", false).Set()
 
 	j, _ = json.Marshal(v)
-	fmt.Printf("success:%v error:%v\nresult:%v", res, err, string(j))
+	fmt.Printf("success:%v error:%v\nresult:%v\n", res, err, string(j))
 }

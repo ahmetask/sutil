@@ -14,6 +14,7 @@ type path struct {
 type SUtil struct {
 	data    interface{}
 	value   interface{}
+	res     interface{}
 	path    path
 	success bool
 	err     error
@@ -23,6 +24,7 @@ type ISUtil interface {
 	WithValue(v interface{}) ISUtil
 	WithPath(p string, json bool) ISUtil
 	Set() (bool, error)
+	Get() Optional
 }
 
 func New(data interface{}) ISUtil {
@@ -129,7 +131,58 @@ func (s *SUtil) setR(o interface{}, v interface{}, base string) {
 	return
 }
 
+func (s *SUtil) getR(o interface{}, base string) {
+	rv := s.reflectValue(o)
+
+	if rv.Kind() == reflect.Invalid {
+		return
+	} else if rv.Kind() != reflect.Struct {
+		if s.path.value == strings.TrimPrefix(base, ".") {
+			s.res = rv.Interface()
+		}
+		return
+	}
+
+	reflectType := rv.Type()
+
+	for i := 0; i < reflectType.NumField(); i++ {
+		field := reflectType.Field(i)
+
+		p := ""
+		if s.path.json {
+			p = base + "." + field.Tag.Get("json")
+		} else {
+			p = base + "." + field.Name
+		}
+
+		fieldI := rv.Field(i)
+		pathMatch := s.path.value == strings.TrimPrefix(p, ".")
+		if fieldI.Kind() == reflect.Struct || fieldI.Kind() == reflect.Ptr {
+			if pathMatch {
+				if fieldI.Kind() == reflect.Ptr {
+					fieldI = fieldI.Elem()
+				}
+				s.res = fieldI.Interface()
+			} else {
+				s.getR(fieldI.Interface(), p)
+			}
+		} else {
+			if pathMatch {
+				s.res = fieldI.Interface()
+			}
+		}
+	}
+
+	return
+}
+
 func (s *SUtil) Set() (bool, error) {
 	s.setR(s.data, s.value, "")
 	return s.success, s.err
+}
+
+func (s *SUtil) Get() Optional {
+
+	s.getR(s.data, "")
+	return &Data{V: s.res}
 }
