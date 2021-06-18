@@ -42,6 +42,13 @@ func TestSet_Copy_Value(t *testing.T) {
 	assert.Equal(t, v.A, "Foo")
 }
 
+func TestGet_1(t *testing.T) {
+	v := MyStruct{A: "Foo", I: &InnerStruct{B: NewInt64(2), D: &DeepStruct{C: NewString("a")}}}
+
+	res := New(v).WithPath("A", false).Get().Value()
+	assert.Equal(t, "Foo", res)
+}
+
 func TestSet_Address_Value(t *testing.T) {
 
 	v := &MyStruct{A: "Foo", I: &InnerStruct{B: NewInt64(2), D: &DeepStruct{C: NewString("a")}}}
@@ -64,6 +71,13 @@ func TestSetIsNil(t *testing.T) {
 	assert.Nil(t, v.I.D.C)
 }
 
+func TestGet_2(t *testing.T) {
+	v := &MyStruct{A: "Foo", I: &InnerStruct{B: NewInt64(2), D: &DeepStruct{C: NewString("a")}}}
+
+	res := New(v).WithPath("I.D.C", false).Get().Value()
+	assert.Equal(t, "a", res)
+}
+
 func TestSetIsNil_json(t *testing.T) {
 
 	v := &MyStruct{A: "Foo", I: &InnerStruct{B: NewInt64(2), D: &DeepStruct{C: NewString("a")}}}
@@ -73,6 +87,13 @@ func TestSetIsNil_json(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, r)
 	assert.Nil(t, v.I.D.C)
+}
+
+func TestGet_2_json(t *testing.T) {
+	v := &MyStruct{A: "Foo", I: &InnerStruct{B: NewInt64(2), D: &DeepStruct{C: NewString("a")}}}
+
+	res := New(v).WithPath("i.d.c", true).Get().Value()
+	assert.Equal(t, "a", res)
 }
 
 func TestSet(t *testing.T) {
@@ -106,6 +127,13 @@ func TestSet_Without_Addr(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, r)
 	assert.Equal(t, v.I.D.D, int64(2))
+}
+
+func TestGet_3_json(t *testing.T) {
+	v := &MyStruct{A: "Foo", I: &InnerStruct{B: NewInt64(2), D: &DeepStruct{C: NewString("A")}}}
+
+	res := New(v).WithPath("i.d.d", true).Get().Value()
+	assert.Equal(t, int64(0), res)
 }
 
 func TestSet_Without_Addr_json(t *testing.T) {
@@ -173,6 +201,13 @@ func TestSet_Low_Level_String(t *testing.T) {
 	assert.Equal(t, v.I.D.F, "test")
 }
 
+func TestGet_4_json(t *testing.T) {
+	v := &MyStruct{A: "Foo", I: &InnerStruct{B: NewInt64(2), D: &DeepStruct{C: NewString("A"), D: 1, F: "FooX"}}}
+
+	res := New(v).WithPath("i.d.f", true).Get().Value()
+	assert.Equal(t, "FooX", res)
+}
+
 func TestSet_Low_Level_String_Json(t *testing.T) {
 	v := &MyStruct{A: "Foo", I: &InnerStruct{B: NewInt64(2), D: &DeepStruct{C: NewString("A"), D: 1, F: "Foo"}}}
 
@@ -191,6 +226,14 @@ func TestSet_WithoutStruct(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, r)
 	assert.Equal(t, *v, int64(2))
+}
+
+
+func TestGet_5_json(t *testing.T) {
+	v := NewInt64(1)
+
+	res := New(v).WithPath("", true).Get().Value()
+	assert.Equal(t, *v, res)
 }
 
 func TestSet_With_Nil(t *testing.T) {
