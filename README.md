@@ -1,6 +1,9 @@
 # Struct Util
 *  Struct field getter/setter
 
+```go
+go get github.com/ahmetask/sutil 
+```
 # Usage
 ```go
 package main
