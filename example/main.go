@@ -7,14 +7,14 @@ import (
 )
 
 type C struct {
-	C1 string
-	C2 int64
+	C1 string `json:"c_1"`
+	C2 int64 `json:"c_2"`
 }
 type B struct {
-	C *C
+	C *C `json:"c"`
 }
 type A struct {
-	B B
+	B B `json:"b"`
 }
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
 	fmt.Printf("get:%v\n", a.Value())
 
 
-	res, err := sutil.New(v).WithValue("main").WithPath("B.C.C1", false).Set()
+	res, err := sutil.New(v).WithValue("main").WithPath("b.c.c_1", true).Set()
 
 	j, _ := json.Marshal(v)
 	fmt.Printf("success:%v error:%v\nresult:%v\n", res, err, string(j))
